@@ -1,6 +1,6 @@
 # Greek RES Forecasting
 
-An attemp to generate short-term forecasts for wind and solar energy production for the Greek energy grid. Namely, the following hypothesis is explored:
+This study considers the prediction and forecasting of solar and wind power generation on a country-wide basis for the Greek energy grid. Namely, the following hypothesis is explored:
 > The information from weather variables of a subset of RES installation in Greece, along with the last day's production, is sufficient for accurately forecasting the next day's RES generation.
 
 The rendered versions of the [solar energy forecasting notebook can be found here](https://nbviewer.jupyter.org/github/arvartho/greek-res-forecasting-project/blob/main/RES%20Forecasting%20-%20Solar%20Power%20Forecasting.ipynb) and similarily here is the [wind energy forecasting notebook](https://nbviewer.jupyter.org/github/arvartho/greek-res-forecasting-project/blob/main/RES%20Forecasting%20-%20Wind%20Power%20Forecasting.ipynb)
