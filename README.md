@@ -3,6 +3,8 @@
 An attemp to generate short-term forecasts for wind and solar energy production for the Greek energy grid. Namely, the following hypothesis is explored:
 > The information from weather variables of a subset of RES installation in Greece, along with the last day's production, is sufficient for accurately forecasting the next day's RES generation.
 
+The rendered versions of the [solar energy forecasting notebook can be found here](https://nbviewer.jupyter.org/github/arvartho/greek-res-forecasting-project/blob/main/RES%20Forecasting%20-%20Solar%20Power%20Forecasting.ipynb) and similarily here is the [wind energy forecasting notebook](https://nbviewer.jupyter.org/github/arvartho/greek-res-forecasting-project/blob/main/RES%20Forecasting%20-%20Wind%20Power%20Forecasting.ipynb)
+
 ## Premise
 In detail, the idea behind this exercise is to explore the predictability of the solar energy production for the Greek energy grid by using only aggregated weather information from the top 20% of wind and solar installations. The forecast horizon for this project is one week, and the predictions are performed by applying a rolling forecast with one day window and using as features the next day's weather forecast and the previous day energy production. Additionally, a number of temporal features are used as well, in an attemp to describe the seasonality of the timeseries. Features such as the month, hour, day, day of week and day of year are encoded with polar coordinates to capture their cyclical nature.
 
@@ -34,7 +36,9 @@ For the experiments, 4 years of weather and energy data were collected from 2017
 
 ## Conclusion
 The experiments draw the conclusion that the non-linear models (Random Forest Regression and Extreme Gradient Boost) can be better predictors of the renewble energy in the Greek grid. Especially when it comes to wind energy forecasts, the RF and XGB, perform much better than the linear and hybrid models. This is consistent with the bibliography that suggests that the volatile nature of wind can better captured by non-linear models.
+
 When it comes to solar energy, which is less volatile and with more predictable seasonality, the performance of linear and non-linear models is comperable, although RF and XGB still outperform their counterparts. 
+
 Additionally, the experiments that were conducted in different weekly time frames across the year, indicate that soral energy output during summer and winter (July and January) months is more predictable than the rest of the year. On the other hand wind energy generation has no obvious seasonal pattern, thus can be equally volatile and challenging to predict throughout the year.
 
 ---
