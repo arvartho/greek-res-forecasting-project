@@ -39,7 +39,7 @@ The experiments draw the conclusion that the non-linear models (Random Forest Re
 
 When it comes to solar energy, which is less volatile and with more predictable seasonality, the performance of linear and non-linear models is comperable, although RF and XGB still outperform their counterparts. 
 
-Additionally, the experiments that were conducted in different weekly time frames across the year, indicate that soral energy output during summer and winter (July and January) months is more predictable than the rest of the year. On the other hand wind energy generation has no obvious seasonal pattern, thus can be equally volatile and challenging to predict throughout the year.
+Additionally, the experiments that were conducted in different weekly time frames across the year, indicate that solar energy output during summer and winter (July and January) months is more predictable than the rest of the year. On the other hand wind energy generation has no obvious seasonal pattern, thus can be equally volatile and challenging to predict throughout the year.
 
 ---
 
