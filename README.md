@@ -9,7 +9,7 @@ Below you can find the rendered versions of the jupyter notebooks used for the f
 
 
 ## Premise
-In detail, the idea behind this exercise is to explore the predictability of wind and solar energy production for the Greek energy grid by using only aggregated weather information from the top 20% of wind and solar installations. The forecast horizon for this project is one week, and the predictions are performed by applying a rolling forecast with one day window and using as features the next day's weather forecast and the previous day energy production. Additionally, a number of temporal features are used as well, in an attempt to describe the seasonality of the timeseries. Features such as the month, hour, day, day of week and day of year are encoded with polar coordinates to capture their cyclical nature.
+In detail, the idea behind this exercise is to explore the predictability of wind and solar energy production for the Greek energy grid by using only aggregated weather information from the top 20% of wind and solar installations. The forecast horizon for this project is one week, and the predictions are performed by applying a rolling forecast with one day window and using as features the next day's weather forecast and the previous day energy production. Additionally, a number of temporal features are used as well, in an attempt to describe the seasonality of the timeseries. Features such as the month, hour, day, day of week and day of year are encoded with polar coordinates to capture their cyclical nature. Also, statistical features are added that capture the mean , max, min, std, var and skew of the timeseries. The statistical features are calculated using a 12-hour sliding window across the training and the test set. Fo the final feature selection, the Recursive Feature Extraction (RFE) [1] algorithm is applied, using the feature importance of an Extreme Gradient Boosting model.
 
 
 ## Data
@@ -52,10 +52,12 @@ Additionally, the experiments that were conducted in different weekly time frame
 * Using exhaustive parameter tuning techniques such as grid search can further improve models' prediction performance
 
 ## References
-[1] D. A. Wood, “Hourly-averaged solar plus wind power generation for Germany 2016: Long-term prediction, short-term forecasting, data mining and outlier analysis,” Sustain. Cities Soc., vol. 60, no. April, p. 102227, 2020, doi: 10.1016/j.scs.2020.102227.
+[1] Guyon, I., Weston, J., Barnhill, S., & Vapnik, V., “Gene selection for cancer classification using support vector machines”, Mach. Learn., 46(1-3), 389–422, 2002.
 
-[2] M. Bouzerdoum, A. Mellit, and A. Massi Pavan, “A hybrid model (SARIMA-SVM) for short-term power forecasting of a small-scale grid-connected photovoltaic plant,” Sol. Energy, vol. 98, no. PC, pp. 226–235, 2013, doi: 10.1016/j.solener.2013.10.002.
+[2] D. A. Wood, “Hourly-averaged solar plus wind power generation for Germany 2016: Long-term prediction, short-term forecasting, data mining and outlier analysis,” Sustain. Cities Soc., vol. 60, no. April, p. 102227, 2020, doi: 10.1016/j.scs.2020.102227.
 
-[3] N. Bigdeli, M. Salehi Borujeni, and K. Afshar, “Time series analysis and short-term forecasting of solar irradiation, a new hybrid approach,” Swarm Evol. Comput., vol. 34, pp. 75–88, 2017, doi: 10.1016/j.swevo.2016.12.004.
+[3] M. Bouzerdoum, A. Mellit, and A. Massi Pavan, “A hybrid model (SARIMA-SVM) for short-term power forecasting of a small-scale grid-connected photovoltaic plant,” Sol. Energy, vol. 98, no. PC, pp. 226–235, 2013, doi: 10.1016/j.solener.2013.10.002.
 
-[4] C. Voyant, C. Paoli, M. Muselli, and M. L. Nivet, “Multi-horizon solar radiation forecasting for Mediterranean locations using time series models,” Renew. Sustain. Energy Rev., vol. 28, pp. 44–52, 2013, doi: 10.1016/j.rser.2013.07.058.
+[4] N. Bigdeli, M. Salehi Borujeni, and K. Afshar, “Time series analysis and short-term forecasting of solar irradiation, a new hybrid approach,” Swarm Evol. Comput., vol. 34, pp. 75–88, 2017, doi: 10.1016/j.swevo.2016.12.004.
+
+[5] C. Voyant, C. Paoli, M. Muselli, and M. L. Nivet, “Multi-horizon solar radiation forecasting for Mediterranean locations using time series models,” Renew. Sustain. Energy Rev., vol. 28, pp. 44–52, 2013, doi: 10.1016/j.rser.2013.07.058.
