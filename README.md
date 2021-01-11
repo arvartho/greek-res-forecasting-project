@@ -4,8 +4,8 @@ This study considers the prediction and forecasting of solar and wind power gene
 > The information from weather variables of a subset of RES installation in Greece, along with the last day's production, is sufficient for accurately forecasting the next day's RES generation.
 
 Below you can find the rendered versions of the jupyter notebooks used for the forecasting of each energy type:
-* [Wind Energy Forecasting](https://nbviewer.jupyter.org/github/arvartho/greek-res-forecasting-project/blob/main/RES%20Forecasting%20-%20Solar%20Power%20Forecasting.ipynb)
-* [Solar Energy Forecasting](https://nbviewer.jupyter.org/github/arvartho/greek-res-forecasting-project/blob/main/RES%20Forecasting%20-%20Wind%20Power%20Forecasting.ipynb)
+* [Wind Energy Forecasting](https://nbviewer.jupyter.org/github/arvartho/greek-res-forecasting-project/blob/main/RES%20Forecasting%20-%20Wind%20Power%20Forecasting.ipynb)
+* [Solar Energy Forecasting](https://nbviewer.jupyter.org/github/arvartho/greek-res-forecasting-project/blob/main/RES%20Forecasting%20-%20Solar%20Power%20Forecasting.ipynb)
 
 
 ## Premise
