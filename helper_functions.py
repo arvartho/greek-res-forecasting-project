@@ -1,28 +1,25 @@
 import os
-import pandas as pd
-from pandas.tseries.offsets import DateOffset
-from datetime import datetime, timedelta
-import numpy as np
 import json
 import math
 import random
-from matplotlib import pyplot as plt
-from matplotlib import dates as mdates
+import numpy as np
+import pandas as pd
+from pandas.tseries.offsets import DateOffset
+from datetime import datetime, timedelta
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.io as pio
+from matplotlib import pyplot as plt
+from matplotlib import dates as mdates
 import seaborn as sns
 from fbprophet import Prophet
 import xgboost as xgb
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.model_selection import TimeSeriesSplit
-sns.set_theme(style="white")
-# sns.set()
-
+from sklearn.model_selection import RandomizedSearchCV, TimeSeriesSplit
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-
 import warnings
+
+sns.set_theme(style="white")
 warnings.filterwarnings('ignore')
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -128,7 +125,7 @@ class ModelEvaluation():
       self.model_comparison_dict[model_name] = self.get_metrics(y_true, y_pred)
 
 
-   def fbProphet_init(self, regressors):
+   def fbProphet_init(self, regressors, features):
       prophet = Prophet(
           growth='linear',
           daily_seasonality=False,
@@ -139,17 +136,19 @@ class ModelEvaluation():
       )
 
       # Adding seasonalities
-      prophet.add_seasonality(
-         name='summer', 
-         period=6,
-         fourier_order=2, 
-         condition_name='season_summer')
+      if 'season_summer' in features:
+         prophet.add_seasonality(
+            name='summer', 
+            period=6,
+            fourier_order=2, 
+            condition_name='season_summer')
 
-      prophet.add_seasonality(
-         name='winter', 
-         period=6, 
-         fourier_order=2, 
-         condition_name='season_winter')
+      if 'season_winter' in features:
+         prophet.add_seasonality(
+            name='winter', 
+            period=6, 
+            fourier_order=2, 
+            condition_name='season_winter')
 
       prophet.add_seasonality(
           name='daily',
@@ -176,7 +175,7 @@ class ModelEvaluation():
       return prophet
 
 
-   def pfProphet_prediction(self, days_in_test, regressors, model_name, hybrid=False, hybrid_model=None, eval=True, metrics=True, plot=False):
+   def pfProphet_prediction(self, days_in_test, regressors, model_name, hybrid=False, hybrid_model=None, eval=True, metrics=True, plot=False, save=True):
       pred_dict = {'y_test':[], 'y_pred':[]}
       train_data = self.train_data.copy()
       train_data.loc[:, 'ds'] = train_data['ds'].dt.tz_localize(None)
@@ -189,7 +188,7 @@ class ModelEvaluation():
       start = datetime.now()
       for test_day in days_in_test:
          # Prophet initialization
-         prophet = self.fbProphet_init(regressors)
+         prophet = self.fbProphet_init(regressors, train_data.columns)
          prophet.fit(train_data)
 
          _test_data = test_data.loc[test_data['ds'].dt.date==test_day].copy()
@@ -241,11 +240,15 @@ class ModelEvaluation():
       if eval: 
          self.rolling_eval(forecast_df, model_name)
 
+      # Save prediction
+      if save:
+         self.save_forecast(forecast_df, model_name, days_in_test)
+
       print('Finished forecasting week %s in %s' % (str(days_in_test[0]), datetime.now()-start)) 
       return forecast_df
 
 
-   def rolling_prediction(self, days_in_test, model, model_name, target_column, eval=True, metrics=True, plot=False):
+   def rolling_prediction(self, days_in_test, model, model_name, target_column, eval=True, metrics=True, plot=False, save=True):
       pred_dict = {'y_test':[], 'y_pred':[]}
       train_data = self.train_data.copy()
       test_data = self.test_data.copy()
@@ -255,15 +258,20 @@ class ModelEvaluation():
       print("")
       start = datetime.now()
       for test_day in days_in_test:
-         
-         x_train = train_data.drop(columns=target_column).copy()
-         y_train = train_data.loc[:, target_column].copy()
 
-         x_test = test_data.loc[test_data.index.date==test_day].drop(columns=target_column).copy()
+         x_train = train_data.copy()
+         x_train.drop(columns=target_column, inplace=True)
+         y_train = train_data.loc[:, target_column].copy()
+         
+         x_test = test_data.loc[test_data.index.date==test_day].copy()         
+         x_test.drop(columns=target_column, inplace=True)
          y_test = test_data.loc[test_data.index.date==test_day, target_column].copy()         
 
          model.fit(x_train, y_train)
-         y_pred = model.predict(x_test)        
+         y_pred = model.predict(x_test)     
+
+         # Prediction correction: set lower bound at 0
+         y_pred[y_pred<0] = 0  
 
          if plot:
             self.plot_prediction(y_test, y_pred, model_name = '%s for %s' % (model_name, str(test_day)))
@@ -282,6 +290,10 @@ class ModelEvaluation():
 
       if eval: 
          self.rolling_eval(forecast_df, model_name)
+
+      # Save prediction
+      if save:
+         self.save_forecast(forecast_df, model_name, days_in_test)         
 
       print('Finished forecasting week %s in %s' % (str(days_in_test[0]), datetime.now()-start)) 
       return forecast_df
@@ -326,10 +338,43 @@ class ModelEvaluation():
                   square=True, linewidths=.5, cbar_kws={"shrink": .5})
 
 
+   def save_forecast(self, df, model_name, days_in_test):
+      energy_type = 'wind' if len([col for col in df.columns 
+                                    if 'wind energy' in col.lower()])>1 else 'solar'
+      week = str(days_in_test[0])
+
+      forecast_dir = os.path.join('data', 'forecast_output', week)
+      if not os.path.exists(forecast_dir):      
+         os.makedirs(forecast_dir)
+      df.to_csv(os.path.join(forecast_dir, '%s - %s.csv' % (energy_type, model_name)))
+      
 
 class Preprocessing():
    def __init__(self,):
       pass
+
+   def final_feature_selection(self, train_data, target_column):
+      from sklearn.feature_selection import RFECV
+      from sklearn.model_selection import TimeSeriesSplit
+
+      # Train-test split
+      x_train = train_data.copy()
+      x_train.drop(columns=target_column, inplace=True)
+      y_train = train_data.loc[:, target_column].copy()
+
+      # for time-series cross-validation set 5 folds
+      tscv = TimeSeriesSplit(n_splits=5)
+      # Train RFE feature selectior with cross validation
+      selector = RFECV(xgb.XGBRegressor(), 
+                     step=1, 
+                     cv=tscv,
+                     min_features_to_select = 10,
+                     scoring='neg_mean_squared_error')
+
+      selector.fit(x_train, y_train)
+      features_selected = x_train.columns[selector.support_].tolist() + [target_column]
+      return features_selected
+
 
 hour_dict = {'morning': list(np.arange(7,13)),
              'afternoon': list(np.arange(13,16)), 
@@ -381,6 +426,7 @@ def print_df_specs(df, message=''):
 
 
 
+
 if __name__ == "__main__":
    import json
    from sklearn.linear_model import LinearRegression
@@ -388,6 +434,40 @@ if __name__ == "__main__":
    target_dates = config['target_dates']
    rolling_eval = ModelEvaluation()
 
+   for date in target_dates:
+      # Load training data
+      solar_energy_path = os.path.join('data', 'exported_data', str(date))
+      train_data = pd.read_csv(os.path.join(solar_energy_path, 'solar_train.csv'), 
+                              parse_dates=['time'], 
+                              date_parser=lambda col: pd.to_datetime(col, utc=True),)
+      train_data.loc[:, 'time'] = train_data.time.dt.tz_convert('CET')
+      train_data.set_index('time', inplace=True)
+
+      # Load testing data
+      test_data = pd.read_csv(os.path.join(solar_energy_path, 'solar_test.csv'), 
+                              parse_dates=['time'], 
+                              date_parser=lambda col: pd.to_datetime(col, utc=True),)
+      test_data.loc[:, 'time'] = test_data.time.dt.tz_convert('CET')
+      test_data.set_index('time', inplace=True)
+
+      days_in_test = sorted(set([date.date() for date in test_data.index]))
+      rolling_eval.set_data(train_data, test_data)
+      
+      # Prediction
+      clf_linreg = LinearRegression()
+      rolling_pred_df = rolling_eval.rolling_prediction(days_in_test, 
+                                                         clf_linreg, 
+                                                         'Linear Regression for week %s' % str(date), 
+                                                         'Solar energy (MW)', 
+                                                         eval=True,
+                                                         metrics=False,
+                                                         plot=False,
+                                                         save=False)
+                                                      
+
+
+
+   # ## Prophet
    # for date in target_dates:
    #    # Load training data
    #    wind_energy_path = os.path.join('data', 'exported_data', str(date))
